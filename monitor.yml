@@ -1,0 +1,34 @@
+name: Monitor Instagram
+
+on:
+  schedule:
+    # 11:00 UTC = 08:00 horário de Brasília (sem horário de verão desde 2019)
+    - cron: '0 11 * * *'
+  workflow_dispatch: {}   # permite rodar manualmente pelo site do GitHub também
+
+permissions:
+  contents: write
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar verificação
+        run: python monitor_instagram.py
+
+      - name: Publicar resultado
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Atualiza monitor - $(date +'%d/%m/%Y')"
+          file_pattern: 'docs/index.html dados.json'
