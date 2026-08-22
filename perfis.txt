@@ -1,4 +1,0 @@
-# um @usuario por linha, sem o @
-# linhas começando com # são ignoradas
-# exemplo:
-# colinascomorleans
