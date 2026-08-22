@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diário de Publicações</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  :root{--ink:#161a22;--paper:#eee9dc;--paper-dim:#e2dcca;--rule:#c9c1a8;--stamp:#a63d2f;--ok:#5a6b4f;}
+  *{box-sizing:border-box;}
+  body{background:var(--ink);color:var(--paper);font-family:'Source Serif 4',Georgia,serif;min-height:100vh;padding:32px 16px 80px;margin:0;}
+  .sheet{max-width:760px;margin:0 auto 24px;background:var(--paper);color:var(--ink);border-radius:2px;box-shadow:0 30px 80px rgba(0,0,0,.45);padding:40px 36px 32px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--stamp);font-weight:600;}
+  h1{font-size:32px;margin:6px 0 4px;font-weight:600;}
+  h2{font-size:17px;margin:0 0 14px;font-weight:600;}
+  .entries{display:flex;flex-direction:column;}
+  .entry{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px dashed var(--rule);}
+  .entry:last-child{border-bottom:none;}
+  .stamp{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.05em;padding:5px 9px;border-radius:999px;white-space:nowrap;border:1.5px solid currentColor;text-align:center;}
+  .stamp.fresh{color:var(--ok);}
+  .stamp.stale{color:var(--stamp);}
+  .meta .name{font-size:16.5px;font-weight:600;}
+  .meta .date{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6b6552;margin-top:2px;}
+  .link a{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--stamp);}
+  .link a:hover{color:var(--stamp);}
+  .footnote{margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#8a8570;text-align:center;}
+  .empty{text-align:center;padding:36px 10px;color:#7a745f;font-family:'IBM Plex Mono',monospace;font-size:12.5px;}
+  @media (max-width:640px){.sheet{padding:26px 18px 22px;} .entry{grid-template-columns:1fr;row-gap:8px;} .stamp{justify-self:start;}}
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="eyebrow">Diário de publicações</div>
+    <h1>Monitor de Instagram</h1>
+    <h2 style="font-weight:400;font-size:14px;color:#6b6552;">Atualizado automaticamente em 22/08/2026 às 12:10</h2>
+    <div class="entries" id="entries"></div>
+    <div class="footnote">gerado por monitor_instagram.py</div>
+  </div>
+<script>
+const dados = {};
+const entriesEl = document.getElementById('entries');
+const usuarios = Object.keys(dados);
+
+if(usuarios.length === 0){
+  entriesEl.innerHTML = '<div class="empty">Nenhum dado coletado ainda.</div>';
+} else {
+  const ordenados = usuarios
+    .filter(u => dados[u] && dados[u].data)
+    .sort((a,b) => new Date(dados[b].data) - new Date(dados[a].data));
+
+  entriesEl.innerHTML = ordenados.map(u => {
+    const info = dados[u];
+    const data = new Date(info.data);
+    const hoje = new Date();
+    const dias = Math.floor((hoje - data) / (1000*60*60*24));
+    const fresh = dias <= 14;
+    const label = dias === 0 ? 'hoje' : dias === 1 ? 'há 1 dia' : `há ${dias} dias`;
+    const dataFmt = data.toLocaleDateString('pt-BR');
+    return `
+      <div class="entry">
+        <div class="stamp ${fresh ? 'fresh' : 'stale'}">${label}</div>
+        <div class="meta">
+          <div class="name">@${u}</div>
+          <div class="date">postou em ${dataFmt}</div>
+        </div>
+        <div class="link"><a href="${info.link}" target="_blank" rel="noopener">ver post →</a></div>
+      </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
